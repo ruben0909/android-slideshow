@@ -89,8 +89,6 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 		}
 	}
 
-
-
 	private final Runnable loadingRunnable = new Runnable() {
 		@Override
 		public void run() {
