@@ -1,6 +1,7 @@
 package link.standen.michael.slideshow;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -38,6 +40,17 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Check if the user has granted the WRITE_SETTINGS permission
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			if (Settings.System.canWrite(this)) {
+				// Set the screen brightness to maximum (255)
+				setScreenBrightness(255);
+			} else {
+				// Request permission if it's not granted
+				startActivity(new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS));
+			}
+		}
 		setContentView(R.layout.activity_main);
 		Toolbar toolbar = findViewById(R.id.toolbar);
 		setSupportActionBar(toolbar);
@@ -158,6 +171,15 @@ public class MainActivity extends BaseActivity {
 		});
 	}
 
+	// Method to change screen brightness
+	private void setScreenBrightness(int brightness) {
+		// Ensure the brightness value is within the range of 0 to 255
+		if (brightness < 0) brightness = 0;
+		if (brightness > 255) brightness = 255;
+
+		ContentResolver contentResolver = getContentResolver();
+		Settings.System.putInt(contentResolver, Settings.System.SCREEN_BRIGHTNESS, brightness);
+	}
 	/**
 	 * Begin a slideshow at the given point
 	 * @param folderPath The folder location

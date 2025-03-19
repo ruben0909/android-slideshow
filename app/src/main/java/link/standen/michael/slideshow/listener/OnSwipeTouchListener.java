@@ -1,6 +1,7 @@
 package link.standen.michael.slideshow.listener;
 
 import android.content.Context;
+import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -11,6 +12,8 @@ import android.view.View;
  */
 public abstract class OnSwipeTouchListener implements View.OnTouchListener {
 
+	private final Handler handler = new Handler();
+	private boolean isLongPress = false;
 	private final GestureDetector gestureDetector;
 
 	protected OnSwipeTouchListener (Context ctx){
@@ -19,6 +22,18 @@ public abstract class OnSwipeTouchListener implements View.OnTouchListener {
 
 	@Override
 	public boolean onTouch(View v, MotionEvent event) {
+		if (event.getAction() == MotionEvent.ACTION_DOWN) {
+			isLongPress = false;
+			handler.postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					isLongPress = true;
+					onLongClick();
+				}
+			}, 10000);
+		} else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+			handler.removeCallbacksAndMessages(null);
+		}
 		return gestureDetector.onTouchEvent(event);
 	}
 
@@ -34,7 +49,9 @@ public abstract class OnSwipeTouchListener implements View.OnTouchListener {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-			onClick();
+			if (!isLongPress) {
+				onClick();
+			}
 			return super.onSingleTapConfirmed(e);
 		}
 
@@ -46,7 +63,7 @@ public abstract class OnSwipeTouchListener implements View.OnTouchListener {
 
 		@Override
 		public void onLongPress(MotionEvent e){
-			onLongClick();
+			//onLongClick();
 			super.onLongPress(e);
 		}
 

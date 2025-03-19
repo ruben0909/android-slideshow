@@ -4,6 +4,8 @@
 
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
 
 	<application
 		android:allowBackup="true"
@@ -29,8 +31,8 @@
 			android:label="@string/title_activity_image"
 			android:parentActivityName=".MainActivity"
 			android:theme="@style/FullscreenTheme"
-			android:resizeableActivity="true"
-			android:supportsPictureInPicture="true"
+			android:resizeableActivity="false"
+			android:supportsPictureInPicture="false"
 			android:configChanges= "screenSize|smallestScreenSize|keyboardHidden|screenLayout|orientation">
 			<meta-data
 				android:name="android.support.PARENT_ACTIVITY"
@@ -54,6 +56,18 @@
 				android:name="android.support.FILE_PROVIDER_PATHS"
 				android:resource="@xml/provider_paths"/>
 		</provider>
+		<receiver android:name=".BootBroadcastReceiver" android:enabled="true" android:exported="false">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"/>
+				<action android:name="android.intent.action.QUICKBOOT_POWERON"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+
+			<!-- Para que funcione en dispositivos con versiones anteriores a 8 -->
+			<intent-filter>
+				<action android:name="android.intent.action.REBOOT"/>
+			</intent-filter>
+		</receiver>
 	</application>
 
 </manifest>

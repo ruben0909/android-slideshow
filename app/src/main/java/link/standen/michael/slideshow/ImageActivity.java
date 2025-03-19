@@ -79,6 +79,16 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 	private boolean isLoading = false;
 	private Snackbar loadingSnackbar = null;
 	private final Handler loadingHandler = new Handler();
+
+
+	@Override
+	protected void onResume(){
+		super.onResume();
+		if(!isRunning){
+			toggle();
+		}
+	}
+
 	private final Runnable loadingRunnable = new Runnable() {
 		@Override
 		public void run() {
@@ -147,10 +157,10 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 			// at compile-time and do nothing on earlier devices.
 			mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
 					| View.SYSTEM_UI_FLAG_FULLSCREEN
-					| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
 					| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-					| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+					| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+					| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 			if (IMAGE_DETAILS_DURING && !inPipMode) {
 				mDetailsView.setVisibility(View.VISIBLE);
 			}
@@ -182,6 +192,11 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 
 	private boolean userInputAllowed = true;
 
+	@Override
+	public void onBackPressed() {
+		// No hacer nada para evitar que el botón Atrás funcione
+		// Puedes añadir un mensaje si lo deseas
+	}
 	@SuppressLint("ClickableViewAccessibility")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -301,7 +316,7 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 
 		// Set up image list
 		fileList = new FileItemHelper(this).getFileList(currentPath, false, imagePath == null);
-		if (fileList.size() == 0){
+		if (fileList.isEmpty()){
 			// No files to view. Exit
 			Log.i(TAG, "No files in list.");
 			Toast.makeText(this, R.string.toast_no_files, Toast.LENGTH_SHORT).show();
@@ -443,7 +458,7 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 		Log.d(TAG, String.format("REVERSE_ORDER: %b", REVERSE_ORDER));
 		RANDOM_ORDER = preferences.getBoolean("random_order", false);
 		Log.d(TAG, String.format("RANDOM_ORDER: %b", RANDOM_ORDER));
-		REFRESH_FOLDER = preferences.getBoolean("refresh_folder", false);
+		REFRESH_FOLDER = preferences.getBoolean("refresh_folder", true);
 		Log.d(TAG, String.format("REFRESH_FOLDER: %b", REFRESH_FOLDER));
 		IMAGE_DETAILS = preferences.getBoolean("image_details", false);
 		Log.d(TAG, String.format("IMAGE_DETAILS: %b", IMAGE_DETAILS));
@@ -768,6 +783,7 @@ public class ImageActivity extends BaseActivity implements ImageStrategy.ImageSt
 		}
 		mControlsView.setVisibility(View.GONE);
 		mVisible = false;
+
 
 		// Schedule a runnable to remove the status and navigation bar after a delay
 		mHideHandler.removeCallbacks(mShowPart2Runnable);
