@@ -2,6 +2,7 @@ package link.standen.michael.slideshow;
 
 import android.Manifest;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -60,7 +61,7 @@ public class MainActivity extends BaseActivity {
 
 		// Path is external absolute directory
 		if (currentPath == null) {
-			currentPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+			currentPath = getWhatsAppFolder(this);
 		}
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		if (preferences.getBoolean("remember_location", false)){
@@ -192,6 +193,47 @@ public class MainActivity extends BaseActivity {
 		intent.putExtra("imagePath", filePath);
 		intent.putExtra("autoStart", autoStart);
 		this.startActivity(intent);
+	}
+	/**
+	 * Get the root location, considering the preferences.
+	 * @return The root location
+	 * @see #getRootLocation()
+	 */
+	private static String getWhatsAppFolder(Context context) {
+		// Lista de posibles rutas
+		File[] possiblePaths = {
+				new File(Environment.getExternalStorageDirectory(), "WhatsApp"), // Almacenamiento interno
+				new File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp") // Android 10+
+		};
+
+		// En Android 11+, buscar en directorios públicos
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			possiblePaths = new File[]{
+					new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "WhatsApp"),
+					new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "WhatsApp"),
+					new File(Environment.getExternalStorageDirectory(), "Android/media/com.whatsapp")
+			};
+		}
+
+		// Buscar en almacenamiento externo (tarjeta SD)
+		File[] externalDirs = context.getExternalFilesDirs(null);
+		for (File dir : externalDirs) {
+			if (dir != null) {
+				File sdWhatsApp = new File(dir.getParentFile().getParentFile().getParentFile(), "WhatsApp");
+				if (sdWhatsApp.exists()) {
+					return sdWhatsApp.getAbsolutePath();
+				}
+			}
+		}
+
+		// Verificar rutas en almacenamiento interno
+		for (File path : possiblePaths) {
+			if (path.exists()) {
+				return path.getAbsolutePath();
+			}
+		}
+
+		return null; // No se encontró la carpeta de WhatsApp
 	}
 
 	/**
